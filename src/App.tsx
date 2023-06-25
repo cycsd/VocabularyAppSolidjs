@@ -7,8 +7,8 @@ import { Home } from './pages/Home';
 
 const App: Component = () => {
   return (
-    <div >
-      <header>
+    <div class="container m-auto">
+      <header class="my-4 p-2 text-xl flex items-center gap-4 justify-start">
         <A href='/'>Home</A>
       </header>
       <Routes>
