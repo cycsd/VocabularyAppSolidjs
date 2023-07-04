@@ -1,4 +1,4 @@
-import { Accessor, Setter, createContext,useContext, createSignal, onMount } from "solid-js";
+import { Accessor, Setter, createContext,useContext, createSignal, onMount, onCleanup } from "solid-js";
 import { createStore } from "solid-js/store";
 
 export interface WordContextValue{
@@ -19,10 +19,15 @@ export function WordProvider(props:any){
         if (window.getSelection && (activeElTagName != "input") && (activeElTagName != "textarea")) {
             text = window.getSelection()?.toString()??"";
         }
-        return setWord(text.trim());
+        return setWord(word=>text.trim()===""?word:text);
     }
     onMount(()=>{
-        document.onkeyup = document.onmouseup = getSelectWord
+        document.body.addEventListener("dblclick", getSelectWord);
+        document.body.addEventListener("mouseup", getSelectWord);
+    })
+    onCleanup(()=>{
+        document.body.removeEventListener("dblclick", getSelectWord);
+        document.body.removeEventListener("mouseup", getSelectWord);
     })
 
     const [word,setWord] = createSignal("");
