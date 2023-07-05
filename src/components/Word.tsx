@@ -1,4 +1,4 @@
-import { For, Index, Match, Show, Switch, createResource, createSignal } from "solid-js";
+import { For,  Match,Switch, createResource, } from "solid-js";
 import { useWordContext } from "../context/WordContext"
 import { Card, Col, Nav, Row, Tab } from "solid-bootstrap";
 
