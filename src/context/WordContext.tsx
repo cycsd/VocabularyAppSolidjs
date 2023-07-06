@@ -1,4 +1,4 @@
-import { MousePositionInside, useMousePosition } from "@solid-primitives/mouse";
+import { MousePositionInside, createMousePosition, useMousePosition } from "@solid-primitives/mouse";
 import { Position } from '@solid-primitives/utils';
 import { Accessor, Setter, createContext,useContext, createSignal, onMount, onCleanup } from "solid-js";
 import { createStore } from "solid-js/store";
@@ -11,7 +11,7 @@ export interface WordContextValue{
 export const WordContext = createContext<WordContextValue>();
 
 export function useWordContext(){
-    return useContext(WordContext)
+    return useContext(WordContext)!
 }
 
 export function WordProvider(props:any){
@@ -24,9 +24,14 @@ export function WordProvider(props:any){
         if (window.getSelection && (activeElTagName != "input") && (activeElTagName != "textarea")) {
             text = window.getSelection()?.toString()??"";
         }
-        set_position_onSelect({x:event.clientX,y:event.clientY});
-        return setWord(word=>text.trim()===""?word:text);
-    }
+        if (text.trim().length >0 && text != word()){
+            const pos = useMousePosition();
+            set_position_onSelect({x:pos.x,y:pos.y});
+            setWord(word=>text.trim().length>0?text:word);
+        }
+
+    };
+
     onMount(()=>{
         document.body.addEventListener("dblclick", getSelectWord);
         document.body.addEventListener("mouseup", getSelectWord);
