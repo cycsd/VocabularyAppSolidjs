@@ -59,7 +59,6 @@ export function WordCard(props: { word: SimpleWordInfoDto }) {
     // }
     let play_pronounce = (e: Event) => {
         let audio = new Audio(props.word.pronounceAudioUrl);
-        console.log("in play audio");
         audio.play();
     };
 
