@@ -26,23 +26,23 @@ export function Paragraph() {
     const [pos, setPos] = createSignal({ x: 0, y: 0, elX: 0, elY: 0 });
 
     const [wordCardRef, setWordCardRef] = createSignal<HTMLDivElement>();
-    const mouse = useWordContext()?.mouse_poition_on_click;
-    const relative = createPositionToElement(wordCardRef, mouse!);
+    const mouse = useWordContext().mouse_poition_on_click;
+    const relative = createPositionToElement(wordCardRef, mouse);
 
     return (< Show when={paragraph()} fallback={<p> loading...</p>}>
-        <WordProvider>
-            <audio controls>
-                <source src={paragraph()?.audioUri}></source>
-            </audio>
-            <div innerHTML={paragraph()?.content}></div>
-            <div ref={setWordCardRef} >
-                <div style={{
-                    transform: `translate(${relative.x}px,${relative.y}px)`,
-                }}>
-                    <WordCard></WordCard>
-                </div>
+
+        <audio controls>
+            <source src={paragraph()?.audioUri}></source>
+        </audio>
+        <div innerHTML={paragraph()?.content}></div>
+        <div ref={setWordCardRef} >
+            <div style={{
+                transform: `translate(${relative.x}px,${relative.y+20}px)`,
+            }}
+            class="bg-white border-amber-500 border-2 rounded-md">
+                <WordCard></WordCard>
             </div>
-        </WordProvider>
+        </div>
     </Show>)
 
 }
