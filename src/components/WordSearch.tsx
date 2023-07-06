@@ -1,6 +1,6 @@
 import { useMousePosition } from "@solid-primitives/mouse";
 import { Position } from '@solid-primitives/utils';
-import {  createSignal, createResource, Match, Switch } from "solid-js";
+import { createSignal, createResource, Match, Switch, onMount, onCleanup } from "solid-js";
 import { SimpleWordInfoDto, WordCard } from "./WordCard";
 
 export function WordSearch(props: any) {
@@ -10,20 +10,26 @@ export function WordSearch(props: any) {
     const [word, setWord] = createSignal("");
     const [position_onSelect, set_position_onSelect] = createSignal<Position>({ x: 0, y: 0 });
 
+    let ref: HTMLDivElement;
     const OpenDetail = (event: Event) => {
+        event.stopPropagation();
         setShowIcon(false);
         setShowDetail(true);
+        console.log("OpenDetail");
     }
 
-    const getSelectWord = (event: Event) => {
+    const getSelectWord = (event: MouseEvent) => {
         console.log("getselectword");
         let text = "";
-        setShowIcon(false);
-        setShowDetail(false);
         const activeEl = document.activeElement;
         const activeElTagName = activeEl ? activeEl.tagName.toLowerCase() : null;
         if (window.getSelection && (activeElTagName != "input") && (activeElTagName != "textarea")) {
             text = window.getSelection()?.toString() ?? "";
+        }
+        if (!ref.contains(event.target as Element)) {
+            setShowIcon(false);
+            setShowDetail(false);
+            console.log("not in div");
         }
         if (text.trim().length > 0) {
             if (text != word()) {
@@ -32,8 +38,10 @@ export function WordSearch(props: any) {
                 setWord(word => text.trim().length > 0 ? text : word);
             }
             console.log(showDetail());
-            setShowIcon(icon => !showDetail());
+            setShowIcon(true);
+            console.log(text);
         }
+
 
     };
 
@@ -52,9 +60,18 @@ export function WordSearch(props: any) {
     }
     const [vocabulary] = createResource<SimpleWordInfoDto, string>(word, fetchDefinition);
 
+    onMount(() => {
+        window.addEventListener("dblclick", getSelectWord);
+        window.addEventListener("mouseup", getSelectWord);
+    })
+    onCleanup(() => {
+        window.removeEventListener("dblclick", getSelectWord);
+        window.removeEventListener("mouseup", getSelectWord);
+    })
+
     return (
         <>
-            <div style={
+            <div ref={ref!} style={
                 {
                     position: 'absolute',
                     top: `${position_onSelect().y}px`,
@@ -62,19 +79,20 @@ export function WordSearch(props: any) {
                 }
             } class="bg-white">
                 <Switch>
-                    <Match when={showSearchIcon()}>
-                        <button onclick={OpenDetail}>
-                            <span class="material-symbols-outlined">translate</span>
-                        </button>
-                    </Match>
                     <Match when={showDetail() && vocabulary.state === 'ready'}>
                         <div class="border-amber-500 border-2 rounded-md">
                             <WordCard word={vocabulary()!}></WordCard>
                         </div>
                     </Match>
+                    <Match when={showSearchIcon()}>
+                        <button onclick={OpenDetail}>
+                            <span class="material-symbols-outlined">translate</span>
+                        </button>
+                    </Match>
+
                 </Switch>
             </div>
-            <div onmouseup={getSelectWord} onkeyup={getSelectWord}>
+            <div >
                 {props.children}
             </div>
         </>
