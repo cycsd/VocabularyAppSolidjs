@@ -16,7 +16,6 @@ export function WordSearch(props: any) {
     }
 
     const getSelectWord = (event: Event) => {
-        console.log("getselectword");
         let text = "";
         setShowIcon(false);
         setShowDetail(false);
@@ -31,14 +30,13 @@ export function WordSearch(props: any) {
                 set_position_onSelect({ x: pos.x, y: pos.y + 20 });
                 setWord(word => text.trim().length > 0 ? text : word);
             }
-            console.log(showDetail());
             setShowIcon(icon => !showDetail());
         }
 
     };
 
     const fetchDefinition = async (text: string) => {
-        let url = new URL('https://localhost:7186/api/Vocabulary');
+        let url = new URL('https://localhost:7186/api/Vocabulary/WordDetail');
         if (word().length > 0) {
             url.searchParams.set('word', word());
             console.log(url.toString());
@@ -60,7 +58,7 @@ export function WordSearch(props: any) {
                     top: `${position_onSelect().y}px`,
                     left: `${position_onSelect().x}px`
                 }
-            } class="bg-white">
+            } class="bg-white w-1/4">
                 <Switch>
                     <Match when={showSearchIcon()}>
                         <button onclick={OpenDetail}>
