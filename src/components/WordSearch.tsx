@@ -1,7 +1,9 @@
 import { useMousePosition } from "@solid-primitives/mouse";
 import { Position } from '@solid-primitives/utils';
-import {  createSignal, createResource, Match, Switch } from "solid-js";
+import { createSignal, createResource, Match, Switch } from "solid-js";
 import { SimpleWordInfoDto, WordCard } from "./WordCard";
+import { KeyValuePair } from "./KeyValuePair";
+import { fetchGet } from "../util/utilExtension";
 
 export function WordSearch(props: any) {
 
@@ -46,10 +48,21 @@ export function WordSearch(props: any) {
             return res.json();
         }
         else { throw new Error("bad request"); }
+    }
+    const [vocabulary,{mutate:setVocabulary}] = createResource<SimpleWordInfoDto, string>(word, fetchDefinition);
+
+    const fetchCategories = async () => {
+        const res = await fetchGet('https://localhost:7186/api/Vocabulary/Categories')
+        return res.json()
+    }
+    const [categories] = createResource<KeyValuePair[]>(fetchCategories);
+
+    const saveCategories = (seleted:KeyValuePair[])=>{
+        console.log({seleted});
+        setVocabulary({...vocabulary()!,categories:seleted});
+        console.log(vocabulary());
 
     }
-    const [vocabulary] = createResource<SimpleWordInfoDto, string>(word, fetchDefinition);
-
     return (
         <>
             <div style={
@@ -58,7 +71,7 @@ export function WordSearch(props: any) {
                     top: `${position_onSelect().y}px`,
                     left: `${position_onSelect().x}px`
                 }
-            } class="bg-white w-1/4">
+            } class="bg-white">
                 <Switch>
                     <Match when={showSearchIcon()}>
                         <button onclick={OpenDetail}>
@@ -67,7 +80,10 @@ export function WordSearch(props: any) {
                     </Match>
                     <Match when={showDetail() && vocabulary.state === 'ready'}>
                         <div class="border-amber-500 border-2 rounded-md">
-                            <WordCard word={vocabulary()!}></WordCard>
+                            <WordCard
+                                word={()=>vocabulary()!}
+                                categories={categories() ?? []}
+                                onCategoryChange={saveCategories} ></WordCard>
                         </div>
                     </Match>
                 </Switch>

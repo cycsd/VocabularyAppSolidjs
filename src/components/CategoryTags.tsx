@@ -1,26 +1,29 @@
 import { As, Select } from "@kobalte/core";
-import { Component, For, createResource, createSignal } from "solid-js";
+import { Accessor, Component, For, createResource, createSignal } from "solid-js";
 import { KeyValuePair } from "./KeyValuePair";
 
+interface CategoryProps {
+    selectedValue: Accessor<KeyValuePair[]>,
+    optionValues: Accessor<KeyValuePair[]>,
+    onChange: (selectedValue: KeyValuePair[]) => void,
+}
 
-
-const CategoryOptions: Component = (props:{}) => {
-    const [value,setValues]=createSignal<KeyValuePair>();
-    const getCategories =async () => {
-        const res = await fetchGet('https://localhost:7186/api/Vocabulary/WordDetail');
-        return res.json();      
-    }
-    const [categoriesSource] = createResource<KeyValuePair[]>(getCategories);
-    
-
+const CategoryOptions: Component<CategoryProps> = (props: {
+    selectedValue: Accessor<KeyValuePair[]>,
+    optionValues: Accessor<KeyValuePair[]>,
+    onChange: (selectedValue: KeyValuePair[]) => void,
+}) => {
+    const { selectedValue, optionValues, onChange } = props;
     return (
         <>
             <Select.Root<KeyValuePair>
-                multiple
-                value={categoriesSource()}
-                onChange={setCategories}
-                options={categoriesSource()!}
-                placeholder="Select some fruits…"
+                multiple={true}
+                value={selectedValue()}
+                onChange={onChange}
+                options={optionValues()}
+                 optionValue="key"
+                 optionTextValue="value"
+                //placeholder="select category"
                 itemComponent={props => (
                     <Select.Item item={props.item}>
                         <Select.ItemLabel>{props.item.rawValue.value}</Select.ItemLabel>
@@ -29,19 +32,21 @@ const CategoryOptions: Component = (props:{}) => {
                     </Select.Item>
                 )}
             >
-                <Select.Trigger aria-label="Tags" asChild>
+                <Select.Trigger aria-label="KeyValuePair" asChild>
                     <As component="div">
-                        <Select.Value<string>>
+                        <Select.Value<KeyValuePair>>
                             {state => (
                                 <>
                                     <div>
                                         <For each={state.selectedOptions()}>
-                                            {option => (
+                                            {option => (<>
                                                 <span onPointerDown={e => e.stopPropagation()}>
-                                                    {option}
+                                                    {option.value}
                                                     <button onClick={() => state.remove(option)}>
+                                                        <span>remove</span>
                                                     </button>
                                                 </span>
+                                            </>
                                             )}
                                         </For>
                                     </div>
