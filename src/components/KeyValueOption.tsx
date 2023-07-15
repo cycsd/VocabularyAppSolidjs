@@ -2,18 +2,22 @@ import { As, Select } from "@kobalte/core";
 import { Accessor, Component, For, createResource, createSignal } from "solid-js";
 import { KeyValuePair } from "./KeyValuePair";
 
-interface CategoryProps {
+interface OptionProps {
     selectedValue: Accessor<KeyValuePair[]>,
     optionValues: Accessor<KeyValuePair[]>,
     onChange: (selectedValue: KeyValuePair[]) => void,
+    placeHolder?: string ,
+    labelName?: string
 }
 
-const CategoryOptions: Component<CategoryProps> = (props: {
+const KeyValueOptions: Component<OptionProps> = (props: {
     selectedValue: Accessor<KeyValuePair[]>,
     optionValues: Accessor<KeyValuePair[]>,
     onChange: (selectedValue: KeyValuePair[]) => void,
+    placeHolder?: string ,
+    labelName?: string 
 }) => {
-    const { selectedValue, optionValues, onChange } = props;
+    const { selectedValue, optionValues, onChange, placeHolder = "", labelName =""} = props;
     return (
         <>
             <Select.Root<KeyValuePair>
@@ -21,9 +25,9 @@ const CategoryOptions: Component<CategoryProps> = (props: {
                 value={selectedValue()}
                 onChange={onChange}
                 options={optionValues()}
-                 optionValue="key"
-                 optionTextValue="value"
-                //placeholder="select category"
+                optionValue="key"
+                optionTextValue="value"
+                placeholder={placeHolder}
                 itemComponent={props => (
                     <Select.Item item={props.item}>
                         <Select.ItemLabel>{props.item.rawValue.value}</Select.ItemLabel>
@@ -32,7 +36,7 @@ const CategoryOptions: Component<CategoryProps> = (props: {
                     </Select.Item>
                 )}
             >
-                <Select.Trigger aria-label="KeyValuePair" asChild>
+                <Select.Trigger aria-label={labelName} asChild>
                     <As component="div">
                         <Select.Value<KeyValuePair>>
                             {state => (
@@ -69,4 +73,4 @@ const CategoryOptions: Component<CategoryProps> = (props: {
     );
 }
 
-export { CategoryOptions }
+export { KeyValueOptions}
