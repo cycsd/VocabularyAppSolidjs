@@ -23,6 +23,7 @@
     "@solid-primitives/mouse": "^2.0.14",
     "@solidjs/router": "^0.8.2",
     "solid-bootstrap": "^1.0.13",
+    "solid-icons": "^1.0.11",
     "solid-js": "^1.7.6"
   }
 }

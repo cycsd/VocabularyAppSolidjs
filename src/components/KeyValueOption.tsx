@@ -1,12 +1,13 @@
 import { As, Select } from "@kobalte/core";
 import { Accessor, Component, For, createResource, createSignal } from "solid-js";
 import { KeyValuePair } from "./KeyValuePair";
+import { VsCheck, VsClose, VsError, VsErrorSmall, VsFilter } from 'solid-icons/vs'
 
 interface OptionProps {
     selectedValue: Accessor<KeyValuePair[]>,
     optionValues: Accessor<KeyValuePair[]>,
     onChange: (selectedValue: KeyValuePair[]) => void,
-    placeHolder?: string ,
+    placeHolder?: string,
     labelName?: string
 }
 
@@ -14,10 +15,10 @@ const KeyValueOptions: Component<OptionProps> = (props: {
     selectedValue: Accessor<KeyValuePair[]>,
     optionValues: Accessor<KeyValuePair[]>,
     onChange: (selectedValue: KeyValuePair[]) => void,
-    placeHolder?: string ,
-    labelName?: string 
+    placeHolder?: string,
+    labelName?: string
 }) => {
-    const { selectedValue, optionValues, onChange, placeHolder = "", labelName =""} = props;
+    const { selectedValue, optionValues, onChange, placeHolder = "", labelName = "" } = props;
     return (
         <>
             <Select.Root<KeyValuePair>
@@ -29,25 +30,26 @@ const KeyValueOptions: Component<OptionProps> = (props: {
                 optionTextValue="value"
                 placeholder={placeHolder}
                 itemComponent={props => (
-                    <Select.Item item={props.item}>
+                    <Select.Item item={props.item} class="flex justify-between">
                         <Select.ItemLabel>{props.item.rawValue.value}</Select.ItemLabel>
                         <Select.ItemIndicator>
+                            <VsCheck />
                         </Select.ItemIndicator>
                     </Select.Item>
                 )}
             >
                 <Select.Trigger aria-label={labelName} asChild>
-                    <As component="div">
+                    <As component="div" class="flex  justify-evenly items-center">
                         <Select.Value<KeyValuePair>>
                             {state => (
-                                <>
+                                <div class="flex justify-between items-center">
                                     <div>
                                         <For each={state.selectedOptions()}>
                                             {option => (<>
                                                 <span onPointerDown={e => e.stopPropagation()}>
                                                     {option.value}
                                                     <button onClick={() => state.remove(option)}>
-                                                        <span>remove</span>
+                                                        <VsErrorSmall />
                                                     </button>
                                                 </span>
                                             </>
@@ -55,11 +57,13 @@ const KeyValueOptions: Component<OptionProps> = (props: {
                                         </For>
                                     </div>
                                     <button onPointerDown={e => e.stopPropagation()} onClick={state.clear}>
+                                    <VsClose />
                                     </button>
-                                </>
+                                </div>
                             )}
                         </Select.Value>
                         <Select.Icon>
+                        <VsFilter />
                         </Select.Icon>
                     </As>
                 </Select.Trigger>
@@ -73,4 +77,4 @@ const KeyValueOptions: Component<OptionProps> = (props: {
     );
 }
 
-export { KeyValueOptions}
+export { KeyValueOptions }

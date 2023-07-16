@@ -87,7 +87,7 @@ export function WordCard(props: {
                     play_arrow
                 </span>
             </div>
-            <div class="flex justify-between basis-1/2">
+            <div class="flex justify-end items-center basis-2/3">
                 <KeyValueOptions
                     selectedValue={() => word().categories}
                     optionValues={() => props.categories}
