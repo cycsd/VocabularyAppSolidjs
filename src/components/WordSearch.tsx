@@ -109,7 +109,7 @@ export function WordSearch(props: any) {
                     </Match>
                 </Switch>
             </div>
-            <div onmouseup={getSelectWord} onkeyup={getSelectWord}>
+            <div onmouseup={getSelectWord}>
                 {props.children}
             </div>
         </>

@@ -5,23 +5,35 @@ import { KeyValuePair } from "../components/KeyValuePair";
 import { SimpleWordInfoDto, fetchCategories } from "../context/Resource";
 import { ChangeCategory, DeleteWord, GetWord, SaveWord, Word } from "../context/Domain";
 import { FaSolidTags } from 'solid-icons/fa'
+import { AiOutlineSearch } from 'solid-icons/ai'
 
-interface A extends Pick<SimpleWordInfoDto, 'text'> {
-    another: string,
+interface SearchParas extends Partial<Pick<SimpleWordInfoDto, 'text' | 'categories'>> {
 }
 
 export function Dictionary() {
-    const getWords = async () => {
+    const getWords = async (para:SearchParas) => {
         const res = await fetchPost(
             'https://localhost:7186/api/Vocabulary/Words',
-            {
-                searchText: "",
-            }
+            para
         );
         return res.json();
     }
-    const [words, { mutate: setWords }] = createResource<SimpleWordInfoDto[]>(getWords);
     const [categories] = createResource<KeyValuePair[]>(fetchCategories);
+    const [searchOption, setSearchOption] = createSignal<SearchParas>(
+        { text: "" }
+    );    
+    const [words, { mutate: setWords }] = createResource<SimpleWordInfoDto[],SearchParas>(
+        searchOption,
+        getWords);
+
+    const keySearch = (e: KeyboardEvent) => {
+        setSearchOption({ ...searchOption(), 
+            text: (e.target as HTMLInputElement).value })
+    }
+    const clickCategoryFilter = (category:KeyValuePair)=>{
+        setSearchOption({...searchOption(),
+        categories:[category]})
+    }
 
     const onSaveChange = async (w: SimpleWordInfoDto, pre_status: SaveStatus) => {
         const word: Word = GetWord(w);
@@ -56,31 +68,38 @@ export function Dictionary() {
     }
 
     return (<>
-        <div class="flex items-center">
+        <div class="flex gap-2 justify-around border-2 border-black rounded-xl w-2/3 mx-auto text-2xl">
+            <input onkeyup={keySearch} class="w-full rounded-lg p-2" placeholder="Search..."></input>
+            <button>
+                <AiOutlineSearch />
+            </button>
+        </div>
+        <div class="flex items-center gap-4 p-5">
             <For each={categories()}>{
                 (cate) =>
                     <div>
-                        <FaSolidTags class="inline"/>
+                        <button onclick={()=>clickCategoryFilter(cate)}>
+                        <FaSolidTags class="inline" />
                         {cate.value}
+                        </button>
                     </div>
             }
             </For>
-
         </div>
         <div class="grid grid-cols-1 gap-2">
-        <Show when={words()}>
-            <For each={words()}>{
-                (word, index) => <>
-                    <WordCard
-                        word={() => word}
-                        categories={categories()!}
-                        onCategoryChange={saveCategories(index)}
-                        onSaveChange={onSaveChange}
-                    ></WordCard>
-                </>
-            }
-            </For>
-        </Show>
+            <Show when={words()}>
+                <For each={words()}>{
+                    (word, index) => <>
+                        <WordCard
+                            word={() => word}
+                            categories={categories()!}
+                            onCategoryChange={saveCategories(index)}
+                            onSaveChange={onSaveChange}
+                        ></WordCard>
+                    </>
+                }
+                </For>
+            </Show>
         </div>
     </>)
 }
