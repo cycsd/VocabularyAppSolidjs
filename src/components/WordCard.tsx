@@ -2,6 +2,7 @@ import { Accessor, For, Match, Switch, createMemo, createResource, createSignal,
 import { Card, Col, Nav, Row, Tab } from "solid-bootstrap";
 import { KeyValuePair } from "./KeyValuePair";
 import { KeyValueOptions } from "./KeyValueOption";
+import { fetchPost } from "../util/utilExtension";
 
 export interface VocabularyDto {
     wordId: number | null;
@@ -55,24 +56,29 @@ export interface DefinitionInfoDto {
 }
 
 
-enum SaveStatus {
+export enum SaveStatus {
     Saved,
     Unsaved,
 }
+
 export function WordCard(props: {
     word: Accessor<SimpleWordInfoDto>,
     categories: KeyValuePair[],
-    onCategoryChange: (selected: KeyValuePair[]) => void
+    onCategoryChange: (selected: KeyValuePair[]) => void,
+    onSaveChange: (word: SimpleWordInfoDto, pre_status: SaveStatus) =>Promise<SaveStatus|undefined>,
 }) {
-    const {word,categories,onCategoryChange} = props;
+    const { word, categories, onCategoryChange, onSaveChange } = props;
 
-    const savedStatus = createMemo(() =>
-        word().wordId != 0
-            ? SaveStatus.Saved
-            : SaveStatus.Unsaved);
+    const [savedStatus, setSaveStatus] = createSignal(
+        word().categories.length === 0
+            ? SaveStatus.Unsaved
+            : SaveStatus.Saved);
 
-    const saveWord = () => {
-        //setWord(old => { return { ...old, wordId: 1 } })
+
+    const saveWord =async () => {
+        const pre_status = savedStatus();
+        const new_status =await onSaveChange(word(), pre_status);
+        setSaveStatus(new_status!);
     }
     let play_pronounce = (e: Event) => {
         let audio = new Audio(word().pronounceAudioUrl);
@@ -91,8 +97,8 @@ export function WordCard(props: {
                 <KeyValueOptions
                     selectedValue={() => word().categories}
                     optionValues={() => props.categories}
-                    onChange={props.onCategoryChange} 
-                    labelName="category"/>
+                    onChange={onCategoryChange}
+                    labelName="category" />
                 <button onclick={saveWord}>
                     <svg xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"

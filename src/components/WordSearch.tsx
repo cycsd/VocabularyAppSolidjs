@@ -1,9 +1,18 @@
 import { useMousePosition } from "@solid-primitives/mouse";
 import { Position } from '@solid-primitives/utils';
 import { createSignal, createResource, Match, Switch } from "solid-js";
-import { SimpleWordInfoDto, WordCard } from "./WordCard";
+import { SaveStatus, SimpleWordInfoDto, WordCard } from "./WordCard";
 import { KeyValuePair } from "./KeyValuePair";
-import { fetchGet } from "../util/utilExtension";
+import { fetchGet, fetchPost } from "../util/utilExtension";
+
+interface Word {
+    data: SimpleWordInfoDto,
+    status: 'new' | 'inFavorite',
+}
+interface SaveRespone {
+    id: number,
+    text: string,
+}
 
 export function WordSearch(props: any) {
 
@@ -49,7 +58,7 @@ export function WordSearch(props: any) {
         }
         else { throw new Error("bad request"); }
     }
-    const [vocabulary,{mutate:setVocabulary}] = createResource<SimpleWordInfoDto, string>(word, fetchDefinition);
+    const [vocabulary, { mutate: setVocabulary }] = createResource<SimpleWordInfoDto, string>(word, fetchDefinition);
 
     const fetchCategories = async () => {
         const res = await fetchGet('https://localhost:7186/api/Vocabulary/Categories')
@@ -57,12 +66,69 @@ export function WordSearch(props: any) {
     }
     const [categories] = createResource<KeyValuePair[]>(fetchCategories);
 
-    const saveCategories = (seleted:KeyValuePair[])=>{
-        console.log({seleted});
-        setVocabulary({...vocabulary()!,categories:seleted});
-        console.log(vocabulary());
+    const saveCategories = (seleted: KeyValuePair[]) => {
+        setVocabulary({ ...vocabulary()!, categories: seleted });
+    }
+
+    const ChangeCategories = (word: SimpleWordInfoDto) => {
+        return fetchPost(
+            'https://localhost:7186/api/Vocabulary/ChangeCategories',
+            {
+                wordId: word.wordId,
+                text: word.text,
+                categories: word.categories,
+            }
+        );
+    }
+    const SaveWord = async (word: Word) => {
+        switch (word.status) {
+            case 'new':
+                {
+                    const res = await fetchPost(
+                        'https://localhost:7186/api/Vocabulary/SaveNew',
+                        {
+                            text: word.data.text,
+                            categories: word.data.categories,
+                        }
+                    ).then(res => res.json())
+                        .then(data => data as SaveRespone)
+                    setVocabulary({ ...vocabulary()!, wordId: res.id })
+                }
+            case 'inFavorite':
+                {
+                    const saved = await ChangeCategories(word.data)
+                        .then(res => res.json())
+                        .then(data => data as SaveRespone);
+                }
+        }
+        return SaveStatus.Saved
+    }
+    const DeleteWord = async (word: Word) => {
+        switch (word.status) {
+            case 'inFavorite':
+                {
+                    word.data.categories = [];
+                    const saved = await ChangeCategories(word.data)
+                        .then(res => res.json())
+                        .then(data => data as SaveRespone);
+                }
+        }
+        return SaveStatus.Unsaved;
 
     }
+    const onSaveChange = async (w: SimpleWordInfoDto, pre_status: SaveStatus) => {
+        const word: Word = w.wordId === 0
+            ? { data: w, status: 'new' }
+            : { data: w, status: 'inFavorite' }
+        if (pre_status === SaveStatus.Unsaved) {
+            return await SaveWord(word);
+        }
+        if (pre_status === SaveStatus.Saved){
+            return await DeleteWord(word)
+        }
+    }
+
+
     return (
         <>
             <div style={
@@ -81,9 +147,10 @@ export function WordSearch(props: any) {
                     <Match when={showDetail() && vocabulary.state === 'ready'}>
                         <div class="border-amber-500 border-2 rounded-md">
                             <WordCard
-                                word={()=>vocabulary()!}
+                                word={() => vocabulary()!}
                                 categories={categories() ?? []}
-                                onCategoryChange={saveCategories} ></WordCard>
+                                onCategoryChange={saveCategories}
+                                onSaveChange={onSaveChange}></WordCard>
                         </div>
                     </Match>
                 </Switch>
