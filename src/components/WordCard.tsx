@@ -1,8 +1,8 @@
 import { Accessor, For, Match, Switch, createMemo, createResource, createSignal, } from "solid-js";
 import { Card, Col, Nav, Row, Tab } from "solid-bootstrap";
 import { KeyValuePair } from "./KeyValuePair";
-import { KeyValueOptions } from "./KeyValueOption";
-import { fetchPost } from "../util/utilExtension";
+import { KeyValueOptionsMutilpleSelect } from "./KeyValueOptionMutilpleSelect";
+import { SimpleWordInfoDto } from "../context/Resource";
 
 export interface VocabularyDto {
     wordId: number | null;
@@ -41,20 +41,6 @@ export interface Phonetic {
     license: License;
 }
 
-export interface SimpleWordInfoDto {
-    wordId: number;
-    text: string;
-    partOfSpeech: DefinitionInfoDto[];
-    note: string;
-    pronounceAudioUrl: string;
-    categories: KeyValuePair[],
-}
-
-export interface DefinitionInfoDto {
-    partOfSpeech: string;
-    definitions: string[];
-}
-
 
 export enum SaveStatus {
     Saved,
@@ -65,7 +51,7 @@ export function WordCard(props: {
     word: Accessor<SimpleWordInfoDto>,
     categories: KeyValuePair[],
     onCategoryChange: (selected: KeyValuePair[]) => void,
-    onSaveChange: (word: SimpleWordInfoDto, pre_status: SaveStatus) =>Promise<SaveStatus|undefined>,
+    onSaveChange: (word: SimpleWordInfoDto, pre_status: SaveStatus) => Promise<SaveStatus | undefined>,
 }) {
     const { word, categories, onCategoryChange, onSaveChange } = props;
 
@@ -75,9 +61,9 @@ export function WordCard(props: {
             : SaveStatus.Saved);
 
 
-    const saveWord =async () => {
+    const saveWord = async () => {
         const pre_status = savedStatus();
-        const new_status =await onSaveChange(word(), pre_status);
+        const new_status = await onSaveChange(word(), pre_status);
         setSaveStatus(new_status!);
     }
     let play_pronounce = (e: Event) => {
@@ -94,7 +80,7 @@ export function WordCard(props: {
                 </span>
             </div>
             <div class="flex justify-end items-center basis-2/3">
-                <KeyValueOptions
+                <KeyValueOptionsMutilpleSelect
                     selectedValue={() => word().categories}
                     optionValues={() => props.categories}
                     onChange={onCategoryChange}

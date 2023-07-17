@@ -11,13 +11,14 @@ interface OptionProps {
     labelName?: string
 }
 
-const KeyValueOptions: Component<OptionProps> = (props: {
+const KeyValueOptionsMutilpleSelect: Component<OptionProps> = (props: {
     selectedValue: Accessor<KeyValuePair[]>,
     optionValues: Accessor<KeyValuePair[]>,
     onChange: (selectedValue: KeyValuePair[]) => void,
     placeHolder?: string,
     labelName?: string
 }) => {
+
     const { selectedValue, optionValues, onChange, placeHolder = "", labelName = "" } = props;
     return (
         <>
@@ -77,4 +78,4 @@ const KeyValueOptions: Component<OptionProps> = (props: {
     );
 }
 
-export { KeyValueOptions }
+export { KeyValueOptionsMutilpleSelect}
