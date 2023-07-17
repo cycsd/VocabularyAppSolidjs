@@ -22,7 +22,7 @@ export function WordSearch(props: any) {
         setShowDetail(true);
     }
 
-    const getSelectWord = (event: Event) => {
+    const getSelectWord = (event: MouseEvent) => {
         let text = "";
         setShowIcon(false);
         setShowDetail(false);
@@ -33,8 +33,11 @@ export function WordSearch(props: any) {
         }
         if (text.trim().length > 0) {
             if (text != word()) {
-                const pos = useMousePosition();
-                set_position_onSelect({ x: pos.x, y: pos.y + 20 });
+                //const pos = useMousePosition();
+                var scrollTop = (document.documentElement
+                    || document.body.parentNode
+                    || document.body).scrollTop;
+                set_position_onSelect({ x: event.clientX, y: event.clientY + scrollTop + 20 });
                 setWord(word => text.trim().length > 0 ? text : word);
             }
             setShowIcon(icon => !showDetail());
