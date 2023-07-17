@@ -7,7 +7,7 @@ const fetchGet = (
 
 function fetchPost<T>(
     path: string,
-    data: T){
+    data: T) {
     const headers = {
         "Content-Type": "application/json",
         "Accept": "application/json",
@@ -23,5 +23,11 @@ function fetchPost<T>(
     )
     return f
 }
+function ResponseOk(res: Response) {
+    if (res.ok) {
+        return res.json()
+    }
+    else { throw new Error(res.statusText); }
+}
 
-export { fetchGet ,fetchPost}
+export { fetchGet, fetchPost, ResponseOk }
