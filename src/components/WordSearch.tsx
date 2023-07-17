@@ -5,7 +5,7 @@ import { SaveStatus, WordCard } from "./WordCard";
 import { KeyValuePair } from "./KeyValuePair";
 import { ResponseOk, fetchGet, fetchPost } from "../util/utilExtension";
 import { SimpleWordInfoDto, fetchCategories } from "../context/Resource";
-import { DeleteWord, SaveWord, Word } from "../context/Domain";
+import { ChangeCategory, DeleteWord, GetWord, SaveWord, Word } from "../context/Domain";
 
 
 
@@ -61,14 +61,11 @@ export function WordSearch(props: any) {
 
     const saveCategories = (seleted: KeyValuePair[]) => {
         setVocabulary({ ...vocabulary()!, categories: seleted });
+        ChangeCategory(GetWord(vocabulary()!), seleted);
     }
 
-
-
     const onSaveChange = async (w: SimpleWordInfoDto, pre_status: SaveStatus) => {
-        const word: Word = w.wordId === 0
-            ? { data: w, status: 'new' }
-            : { data: w, status: 'inFavorite' }
+        const word: Word = GetWord(w);
         if (pre_status === SaveStatus.Unsaved) {
             return await SaveWord(word)
                 .then((res) => {
